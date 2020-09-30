@@ -193,9 +193,9 @@ public class TestInArrearWithCatalogVersions extends TestIntegrationBase {
 
         curInvoice = invoiceChecker.checkInvoice(account.getId(), 2, callContext,
                                                  // First catalog version
-                                                 new ExpectedInvoiceItemCheck(new LocalDate(2016, 5, 1), new LocalDate(2016, 5, 8), InvoiceItemType.USAGE, new BigDecimal("1900.00")),
+                                                 new ExpectedInvoiceItemCheck(new LocalDate(2016, 5, 1), new LocalDate(2016, 5, 8), InvoiceItemType.USAGE, new BigDecimal("1900.00")));
                                                  // Second catalog version
-                                                 new ExpectedInvoiceItemCheck(new LocalDate(2016, 5, 8), new LocalDate(2016, 6, 1), InvoiceItemType.USAGE, new BigDecimal("0.00")));
+                                                 //new ExpectedInvoiceItemCheck(new LocalDate(2016, 5, 8), new LocalDate(2016, 6, 1), InvoiceItemType.USAGE, BigDecimal.ZERO));
         invoiceChecker.checkTrackingIds(curInvoice, ImmutableSet.of("t3", "t4", "t5"), internalCallContext);
 
         // Remove Usage data from period 2016-5-1 -> 2016-6-1 and verify there is no issue (readMaxRawUsagePreviousPeriod = 0 => We ignore any past invoiced period)
@@ -222,14 +222,26 @@ public class TestInArrearWithCatalogVersions extends TestIntegrationBase {
         removeUsageData(entitlementId, "kilowatt-hour", new LocalDate(2016, 6, 13));
 
         // No usage this MONTH
-        busHandler.pushExpectedEvents(NextEvent.INVOICE);
+        busHandler.pushExpectedEvents(NextEvent.NULL_INVOICE);
         clock.addMonths(1);
         assertListenerStatus();
 
         // Check invoicing occurred and - i.e system did not detect deletion of passed invoiced data.
+        /*
         curInvoice = invoiceChecker.checkInvoice(account.getId(), 4, callContext,
                                                  new ExpectedInvoiceItemCheck(new LocalDate(2016, 7, 1), new LocalDate(2016, 8, 1), InvoiceItemType.USAGE, BigDecimal.ZERO));
         invoiceChecker.checkTrackingIds(curInvoice, ImmutableSet.of(), internalCallContext);
+        */
+
+        recordUsageData(entitlementId, "t10", "kilowatt-hour", new LocalDate(2016, 8, 5), 100L, callContext);
+
+        busHandler.pushExpectedEvents(NextEvent.INVOICE, NextEvent.INVOICE_PAYMENT, NextEvent.PAYMENT);
+        clock.addMonths(1);
+        assertListenerStatus();
+
+        curInvoice = invoiceChecker.checkInvoice(account.getId(), 4, callContext,
+                                                         new ExpectedInvoiceItemCheck(new LocalDate(2016, 8, 1), new LocalDate(2016, 9, 1), InvoiceItemType.USAGE, new BigDecimal("250.00")));
+        invoiceChecker.checkTrackingIds(curInvoice, ImmutableSet.of("t10"), internalCallContext);
 
     }
 
@@ -274,14 +286,14 @@ public class TestInArrearWithCatalogVersions extends TestIntegrationBase {
         assertListenerStatus();
 
         curInvoice = invoiceChecker.checkInvoice(account.getId(), 2, callContext,
-                                                 new ExpectedInvoiceItemCheck(new LocalDate(2016, 5, 1), new LocalDate(2016, 5, 8), InvoiceItemType.USAGE, new BigDecimal("150.00")),
+                                                 new ExpectedInvoiceItemCheck(new LocalDate(2016, 5, 1), new LocalDate(2016, 5, 8), InvoiceItemType.USAGE, new BigDecimal("150.00")));
                                                  // Reach the catalog version change date for this subscription
-                                                 new ExpectedInvoiceItemCheck(new LocalDate(2016, 5, 8), new LocalDate(2016, 5, 9), InvoiceItemType.USAGE, new BigDecimal("0.00")));
+                                                 //new ExpectedInvoiceItemCheck(new LocalDate(2016, 5, 8), new LocalDate(2016, 5, 9), InvoiceItemType.USAGE, BigDecimal.ZERO));
         invoiceChecker.checkTrackingIds(curInvoice, ImmutableSet.of("t3"), internalCallContext);
 
         // Check items catalogEffectiveDate are correctly marked against each version
         assertEquals(curInvoice.getInvoiceItems().get(0).getCatalogEffectiveDate().toDate().compareTo(catalog.getVersions().get(0).getEffectiveDate()), 0);
-        assertEquals(curInvoice.getInvoiceItems().get(1).getCatalogEffectiveDate().toDate().compareTo(catalog.getVersions().get(1).getEffectiveDate()), 0);
+        //assertEquals(curInvoice.getInvoiceItems().get(1).getCatalogEffectiveDate().toDate().compareTo(catalog.getVersions().get(1).getEffectiveDate()), 0);
 
         // Original notification before we change BCD
         busHandler.pushExpectedEvents(NextEvent.NULL_INVOICE);

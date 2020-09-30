@@ -847,13 +847,14 @@ public class TestWithBCDUpdate extends TestIntegrationBase {
         assertListenerStatus();
 
         // Set BCD to be the 5
-        busHandler.pushExpectedEvents(NextEvent.BCD_CHANGE, NextEvent.INVOICE);
+        busHandler.pushExpectedEvents(NextEvent.BCD_CHANGE, NextEvent.NULL_INVOICE);
         subscriptionBaseInternalApi.updateBCD(aoSubscription.getId(), 5, null, internalCallContext);
         assertListenerStatus();
 
+        /*
         invoiceChecker.checkInvoice(account.getId(), 3, callContext,
                                     new ExpectedInvoiceItemCheck(new LocalDate(2012, 5, 1), new LocalDate(2012, 5, 5), InvoiceItemType.USAGE, BigDecimal.ZERO));
-
+*/
         // Record usage for second month
         recordUsageData(aoSubscription.getId(), "tracking-3", "bullets", new LocalDate(2012, 5, 5), 100L, callContext);
         recordUsageData(aoSubscription.getId(), "tracking-4", "bullets", new LocalDate(2012, 6, 4), 100L, callContext);
@@ -868,7 +869,7 @@ public class TestWithBCDUpdate extends TestIntegrationBase {
         clock.addDays(4);
         assertListenerStatus();
 
-        invoiceChecker.checkInvoice(account.getId(), 4, callContext,
+        invoiceChecker.checkInvoice(account.getId(), 3, callContext,
                                     new ExpectedInvoiceItemCheck(new LocalDate(2012, 5, 5), new LocalDate(2012, 6, 5), InvoiceItemType.USAGE, new BigDecimal("5.90")));
 
         aoExpectedCTD = new DateTime("2012-06-05T00:00:00.000Z");

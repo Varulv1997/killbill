@@ -77,7 +77,7 @@ public class ContiguousIntervalCapacityUsageInArrear extends ContiguousIntervalU
                                           String.format("ILLEGAL INVOICING STATE: Usage period start='%s', end='%s', amountToBill='%s', (previously billed amount='%s', new proposed amount='%s')",
                                                         startDate, endDate, amountToBill, billedUsage, toBeBilledUsage));
         } else /* amountToBill.compareTo(BigDecimal.ZERO) >= 0 */ {
-            if (!isPeriodPreviouslyBilled || amountToBill.compareTo(BigDecimal.ZERO) > 0) {
+            if (/* !isPeriodPreviouslyBilled || */ amountToBill.compareTo(BigDecimal.ZERO) > 0) {
                 final String itemDetails = areAllBilledItemsWithDetails ? toJson(toBeBilledUsageDetails) : null;
                 final InvoiceItem item = new UsageInvoiceItem(invoiceId, accountId, getBundleId(), getSubscriptionId(), getProductName(), getPlanName(),
                                                               getPhaseName(), usage.getName(), catalogEffectiveDate, startDate, endDate, amountToBill, null, getCurrency(), null, itemDetails);

@@ -89,7 +89,7 @@ public class ContiguousIntervalConsumableUsageInArrear extends ContiguousInterva
                                           String.format("ILLEGAL INVOICING STATE: Usage period start='%s', end='%s', amountToBill='%s', (previously billed amount='%s', new proposed amount='%s')",
                                                         startDate, endDate, amountToBill, billedUsage, toBeBilledUsage));
         } else /* amountToBill.compareTo(BigDecimal.ZERO) >= 0 */ {
-            if (!isPeriodPreviouslyBilled || amountToBill.compareTo(BigDecimal.ZERO) > 0) {
+            if (/* !isPeriodPreviouslyBilled || */  amountToBill.compareTo(BigDecimal.ZERO) > 0) {
                 if (UsageDetailMode.DETAIL == usageDetailMode) {
 
                     for (UsageConsumableInArrearTierUnitAggregate toBeBilledUsageDetail : ((UsageConsumableInArrearAggregate) toBeBilledUsageDetails).getTierDetails()) {

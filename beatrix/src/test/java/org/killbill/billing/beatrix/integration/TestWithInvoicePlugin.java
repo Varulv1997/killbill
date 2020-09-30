@@ -477,7 +477,7 @@ public class TestWithInvoicePlugin extends TestIntegrationBase {
 
 
         Invoice dryRunInvoice = invoiceUserApi.triggerDryRunInvoiceGeneration(account.getId(), new LocalDate(2018, 8, 15), new TestDryRunArguments(DryRunType.TARGET_DATE), callContext);
-        assertEquals(dryRunInvoice.getInvoiceItems().size(), 16);
+        assertEquals(dryRunInvoice.getInvoiceItems().size(), 7);
 
 
     }
