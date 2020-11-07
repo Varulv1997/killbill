@@ -115,9 +115,8 @@ public class RawUsageOptimizer {
 
         // Extract the min from all the dates
         LocalDate targetStartDate = targetDate;
-        for (final BillingPeriod bp : perBillingPeriodMostRecentConsumableInArrearItemEndDate.keySet()) {
-            final LocalDate tmp = perBillingPeriodMostRecentConsumableInArrearItemEndDate.get(bp);
-            final LocalDate targetBillingPeriodDate = InvoiceDateUtils.recedeByNPeriods(tmp, bp, config.getMaxRawUsagePreviousPeriod(internalCallContext));
+        for (final Map.Entry<BillingPeriod, LocalDate> e : perBillingPeriodMostRecentConsumableInArrearItemEndDate.entrySet()) {
+            final LocalDate targetBillingPeriodDate = InvoiceDateUtils.recedeByNPeriods(e.getValue(), e.getKey(), config.getMaxRawUsagePreviousPeriod(internalCallContext));
             if (targetBillingPeriodDate.compareTo(targetStartDate) < 0) {
                 targetStartDate = targetBillingPeriodDate;
             }
