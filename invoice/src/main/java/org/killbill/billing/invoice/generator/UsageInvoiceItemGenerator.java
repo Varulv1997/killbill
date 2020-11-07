@@ -115,7 +115,7 @@ public class UsageInvoiceItemGenerator extends InvoiceItemGenerator {
                             return input.getBillingMode() == BillingMode.IN_ARREAR;
                         }
                     })) {
-                    rawUsgRes = rawUsageOptimizer.getInArrearUsage(minBillingEventDate, targetDate, Iterables.concat(perSubscriptionInArrearUsageItems.values()), eventSet.getUsages(), internalCallContext);
+                    rawUsgRes = rawUsageOptimizer.getInArrearUsage(minBillingEventDate, targetDate, eventSet.getUsages(), internalCallContext);
                 }
 
                 // None of the billing events report any usage IN_ARREAR sections

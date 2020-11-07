@@ -51,7 +51,7 @@ public class TestRawUsageOptimizer extends TestUsageInArrearBase {
         final DefaultUsage usage = createConsumableInArrearUsage(usageName, BillingPeriod.MONTHLY, TierBlockPolicy.ALL_TIERS, tier);
         knownUsage.put(usageName, usage);
 
-        final LocalDate result = rawUsageOptimizer.getOptimizedRawUsageStartDate(firstEventStartDate, invoiceItems, knownUsage, internalCallContext);
+        final LocalDate result = rawUsageOptimizer.getOptimizedRawUsageStartDate(firstEventStartDate, firstEventStartDate.plusDays(1), knownUsage, internalCallContext);
         Assert.assertEquals(result.compareTo(firstEventStartDate), 0);
     }
 
@@ -62,7 +62,9 @@ public class TestRawUsageOptimizer extends TestUsageInArrearBase {
 
         final List<InvoiceItem> invoiceItems = new ArrayList<InvoiceItem>();
         invoiceItems.add(createUsageItem(firstEventStartDate));
-        final LocalDate targetDate = invoiceItems.get(invoiceItems.size() - 1).getEndDate();
+
+        // Next time we should normally run an invoice
+        final LocalDate targetDate = invoiceItems.get(invoiceItems.size() - 1).getEndDate().plusMonths(1);
 
         final Map<String, Usage> knownUsage = new HashMap<String, Usage>();
         final DefaultTieredBlock block = createDefaultTieredBlock("unit", 100, 1000, BigDecimal.ONE);
@@ -70,7 +72,7 @@ public class TestRawUsageOptimizer extends TestUsageInArrearBase {
         final DefaultUsage usage = createConsumableInArrearUsage(usageName, BillingPeriod.MONTHLY, TierBlockPolicy.ALL_TIERS, tier);
         knownUsage.put(usageName, usage);
 
-        final LocalDate result = rawUsageOptimizer.getOptimizedRawUsageStartDate(firstEventStartDate, invoiceItems, knownUsage, internalCallContext);
+        final LocalDate result = rawUsageOptimizer.getOptimizedRawUsageStartDate(firstEventStartDate, targetDate, knownUsage, internalCallContext);
         // The largest endDate for ii is 2014-04-15, and by default org.killbill.invoice.readMaxRawUsagePreviousPeriod == 2 => targetDate =>  2014-02-15,
         // so we default to firstEventStartDate = 2014-03-15
         Assert.assertEquals(result.compareTo(firstEventStartDate), 0);
@@ -85,7 +87,9 @@ public class TestRawUsageOptimizer extends TestUsageInArrearBase {
         for (int i = 0; i < 5; i++) {
             invoiceItems.add(createUsageItem(firstEventStartDate.plusMonths(i)));
         }
-        final LocalDate targetDate = invoiceItems.get(invoiceItems.size() - 1).getEndDate();
+
+        // Next time we should normally run an invoice
+        final LocalDate targetDate = invoiceItems.get(invoiceItems.size() - 1).getEndDate().plusMonths(1);
 
         final Map<String, Usage> knownUsage = new HashMap<String, Usage>();
         final DefaultTieredBlock block = createDefaultTieredBlock("unit", 100, 1000, BigDecimal.ONE);
@@ -93,7 +97,7 @@ public class TestRawUsageOptimizer extends TestUsageInArrearBase {
         final DefaultUsage usage = createConsumableInArrearUsage(usageName, BillingPeriod.MONTHLY, TierBlockPolicy.ALL_TIERS, tier);
         knownUsage.put(usageName, usage);
 
-        final LocalDate result = rawUsageOptimizer.getOptimizedRawUsageStartDate(firstEventStartDate, invoiceItems, knownUsage, internalCallContext);
+        final LocalDate result = rawUsageOptimizer.getOptimizedRawUsageStartDate(firstEventStartDate, targetDate, knownUsage, internalCallContext);
         // The largest endDate for ii is 2014-08-15, and by default org.killbill.invoice.readMaxRawUsagePreviousPeriod == 2 => targetDate =>  2014-06-15
         Assert.assertEquals(result.compareTo(new LocalDate(2014, 06, 15)), 0, "112 got " + result);
     }
@@ -107,7 +111,9 @@ public class TestRawUsageOptimizer extends TestUsageInArrearBase {
         for (int i = 0; i < 5; i++) {
             invoiceItems.add(createUsageItem(firstEventStartDate.plusMonths(i)));
         }
-        final LocalDate targetDate = invoiceItems.get(invoiceItems.size() - 1).getEndDate();
+
+        // Next time we should normally run an invoice
+        final LocalDate targetDate = invoiceItems.get(invoiceItems.size() - 1).getEndDate().plusMonths(1);
 
         final Map<String, Usage> knownUsage = new HashMap<String, Usage>();
         final DefaultTieredBlock block = createDefaultTieredBlock("unit", 100, 1000, BigDecimal.ONE);
@@ -120,10 +126,9 @@ public class TestRawUsageOptimizer extends TestUsageInArrearBase {
         final DefaultUsage usage2 = createConsumableInArrearUsage("usageName2", BillingPeriod.ANNUAL, TierBlockPolicy.ALL_TIERS, tier2);
         knownUsage.put("usageName2", usage2);
 
-        final LocalDate result = rawUsageOptimizer.getOptimizedRawUsageStartDate(firstEventStartDate, invoiceItems, knownUsage, internalCallContext);
-        // The same reasoning applies as previously because there is no usage items against the annual and
-        // so, the largest endDate for ii is 2014-08-15, and by default org.killbill.invoice.readMaxRawUsagePreviousPeriod == 2 => targetDate =>  2014-06-15
-        Assert.assertEquals(result.compareTo(new LocalDate(2014, 06, 15)), 0, "142 got " + result);
+        final LocalDate result = rawUsageOptimizer.getOptimizedRawUsageStartDate(firstEventStartDate, targetDate, knownUsage, internalCallContext);
+        // Because of the ANNUAL kownUsage the optimizer, finds a date too far in the past and defaults to firstEventStartDate
+        Assert.assertEquals(result.compareTo(firstEventStartDate), 0);
     }
 
     private InvoiceItem createUsageItem(final LocalDate startDate) {
